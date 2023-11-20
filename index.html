@@ -29,7 +29,6 @@
       let imageMap = {};
       let currentImageIndex = 1;
       let totalImages = 0;
-      let preFetchedImages = [];
 
       document.addEventListener("DOMContentLoaded", init);
 
@@ -71,7 +70,6 @@
         }
 
         imageElement.src = imageMap[currentImageIndex];
-        doPrefetch();
       }
 
       function previousImage() {
@@ -84,23 +82,10 @@
       }
 
       function doPrefetch() {
-        const next10Images = [];
-        for (let i = 1; i <= 25; i++) {
-          let nextImageIndex = currentImageIndex + i;
-          if (nextImageIndex > totalImages) {
-            nextImageIndex = 1;
-          }
-
-          next10Images.push(nextImageIndex);
+        for (let i = 1; i <= totalImages; i++) {
+          const image = new Image();
+          image.src = imageMap[i];
         }
-
-        next10Images.map((index) => {
-          if (!preFetchedImages.includes(index)) {
-            preFetchedImages.push(index);
-            const image = new Image();
-            image.src = imageMap[index];
-          }
-        });
       }
     </script>
   </body>
