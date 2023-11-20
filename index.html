@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Insta360 One RS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-black">
+    <div
+      class="w-screen h-screen flex justify-center items-center overflow-hidden"
+    >
+      <img id="currentImage" alt="Image" style="display: none" />
+    </div>
+
+    <p class="z-10 fixed text-gray-500 bottom-5 right-5 text-xs">
+      All Images are protected under copyright and are the exclusive property of
+      Insta360
+    </p>
+
+    <img class="z-10 fixed top-5 left-5 w-48" src="/images/logo.svg" />
+
+    <script>
+      const config = {
+        path: "/images/modular/",
+        configFile: "config.json",
+      };
+
+      const imageElement = document.getElementById("currentImage");
+
+      let imageMap = {};
+      let currentImageIndex = 1;
+      let totalImages = 0;
+      let preFetchedImages = [];
+
+      document.addEventListener("DOMContentLoaded", init);
+
+      async function init() {
+        const response = await fetch(`${config.path}${config.configFile}`);
+        const data = await response.json();
+
+        totalImages = data.length;
+        data.map((image, index) => {
+          imageMap[index + 1] = `${config.path}${image}`;
+        });
+
+        imageElement.src = imageMap[currentImageIndex];
+        imageElement.style.display = "block";
+
+        doPrefetch();
+
+        window.addEventListener("wheel", function (event) {
+          if (event.deltaY < 0) {
+            previousImage();
+          } else {
+            nextImage();
+          }
+        });
+
+        window.addEventListener("keydown", function (event) {
+          if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+            previousImage();
+          } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+            nextImage();
+          }
+        });
+      }
+
+      function nextImage() {
+        currentImageIndex++;
+        if (currentImageIndex > totalImages) {
+          currentImageIndex = 1;
+        }
+
+        imageElement.src = imageMap[currentImageIndex];
+        doPrefetch();
+      }
+
+      function previousImage() {
+        currentImageIndex--;
+        if (currentImageIndex < 1) {
+          currentImageIndex = 1;
+        }
+
+        imageElement.src = imageMap[currentImageIndex];
+      }
+
+      function doPrefetch() {
+        const next10Images = [];
+        for (let i = 1; i <= 10; i++) {
+          let nextImageIndex = currentImageIndex + i;
+          if (nextImageIndex > totalImages) {
+            nextImageIndex = 1;
+          }
+
+          next10Images.push(nextImageIndex);
+        }
+
+        next10Images.map((index) => {
+          if (!preFetchedImages.includes(index)) {
+            preFetchedImages.push(index);
+            const image = new Image();
+            image.src = imageMap[index];
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
